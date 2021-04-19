@@ -21,6 +21,7 @@ environment:
   sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
+  percent_indicator: ^3.0.1 # https://pub.dev/packages/percent_indicator/install
   flutter:
     sdk: flutter
 
