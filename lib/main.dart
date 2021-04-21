@@ -1,13 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:percent_indicator/percent_indicator.dart';
+import 'dart:async';
+import 'package:timer/model/count.dart';
+import 'package:timer/widget/indicator.dart';
 import 'package:timer/widget/my_button.dart';
+
+import 'widget/indicator.dart';
 
 void main() {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   // This widget is the root of your application.
+
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  Count count = Count('0', 1.0);
+  Timer timer;
+  int stop;
+  int countTime;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -28,7 +43,11 @@ class MyApp extends StatelessWidget {
                 Expanded(
                   child: MyButton(
                     color: Color(0xFFFF9800),
-                    onPressed: () {},
+                    onPressed: () {
+                      countTime = 0;
+                      stop = 30;
+                      start();
+                    },
                     text: "30 Seg",
                   ),
                 ),
@@ -38,7 +57,11 @@ class MyApp extends StatelessWidget {
                 Expanded(
                   child: MyButton(
                     color: Color(0xFFFF9800),
-                    onPressed: () {},
+                    onPressed: () {
+                      countTime = 0;
+                      stop = 60;
+                      start();
+                    },
                     text: "1 Min",
                   ),
                 ),
@@ -48,36 +71,29 @@ class MyApp extends StatelessWidget {
                 Expanded(
                   child: MyButton(
                     color: Color(0xFFFF9800),
-                    onPressed: () {},
+                    onPressed: () {
+                      countTime = 0;
+                      stop = 300;
+                      start();
+                    },
                     text: "5 Min",
                   ),
                 ),
               ],
             ),
             Expanded(
-              child: CircularPercentIndicator(
-                radius: 200.0,
-                animation: true,
-                animationDuration: 36000,
-                lineWidth: 15.0,
-                percent: 0.4,
-                center: new Text(
-                  "60 Seg.",
-                  style: new TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 20.0),
-                ),
-                circularStrokeCap: CircularStrokeCap.butt,
-                backgroundColor: Colors.yellow,
-                progressColor: Colors.red,
-              ),
-            ),
+                child: Indicator(
+              count: count,
+            )),
             Row(
               children: [
                 Expanded(
                   child: MyButton(
                     color: Color(0xFFFF5722),
-                    onPressed: () {},
-                    text: "Iniciar",
+                    onPressed: () {
+                      startStop();
+                    },
+                    text: "Iniciar/Parar",
                   ),
                 ),
                 SizedBox(
@@ -86,8 +102,11 @@ class MyApp extends StatelessWidget {
                 Expanded(
                   child: MyButton(
                     color: Color(0xFF757575),
-                    onPressed: () {},
-                    text: "Parar",
+                    onPressed: () {
+                      countTime = 0;
+                      start();
+                    },
+                    text: "Reiniciar",
                   ),
                 ),
               ],
@@ -96,5 +115,36 @@ class MyApp extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  start() {
+    
+    if (timer != null) timer.cancel();
+
+    timer = Timer.periodic(Duration(seconds: 1), (Timer timer) {
+      countTime++;
+      setState(() {
+        count.tag = countTime.toString();
+        count.percent = countTime / stop;
+      });
+      print(countTime);
+      print(timer.isActive);
+      if (countTime >= stop) {
+        timer.cancel();
+        print("cancelando");
+        print(timer.isActive);
+      }
+    });
+  }
+
+  startStop() {
+    if (timer != null) {
+      if (timer.isActive) {
+        timer.cancel();
+      } else {
+        start();
+      }
+    }
+
   }
 }
