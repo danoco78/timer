@@ -101,10 +101,7 @@ class _MyAppState extends State<MyApp> {
                 Expanded(
                   child: MyButton(
                     color: Color(0xFF757575),
-                    onPressed: () {
-                      countTime = 0;
-                      start();
-                    },
+                    onPressed: timer == null ? null : reset,
                     text: "Reiniciar",
                   ),
                 ),
@@ -142,6 +139,13 @@ class _MyAppState extends State<MyApp> {
       } else {
         start();
       }
+    }
+  }
+
+  reset() {
+    if (timer != null) {
+      countTime = 0;
+      start();
     }
   }
 }
