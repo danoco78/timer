@@ -90,9 +90,8 @@ class _MyAppState extends State<MyApp> {
                 Expanded(
                   child: MyButton(
                     color: Color(0xFFFF5722),
-                    onPressed: () {
-                      startStop();
-                    },
+                    // ignore: unnecessary_statements
+                    onPressed: timer == null ? null : startStop,
                     text: "Iniciar/Parar",
                   ),
                 ),
@@ -118,7 +117,6 @@ class _MyAppState extends State<MyApp> {
   }
 
   start() {
-    
     if (timer != null) timer.cancel();
 
     timer = Timer.periodic(Duration(seconds: 1), (Timer timer) {
@@ -145,6 +143,5 @@ class _MyAppState extends State<MyApp> {
         start();
       }
     }
-
   }
 }
