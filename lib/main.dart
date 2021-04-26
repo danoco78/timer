@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:timer/model/count.dart';
+import 'package:timer/stream/count_stream.dart';
 import 'package:timer/widget/indicator.dart';
 import 'package:timer/widget/my_button.dart';
 
@@ -19,9 +20,9 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   Count count = Count('0', 1.0);
-  Timer timer;
-  int stop;
-  int countTime;
+  String startStopLabel = "Inciar/Parar";
+
+  final countStream = new CountStream();
 
   @override
   Widget build(BuildContext context) {
@@ -44,9 +45,8 @@ class _MyAppState extends State<MyApp> {
                   child: MyButton(
                     color: Color(0xFFFF9800),
                     onPressed: () {
-                      countTime = 0;
-                      stop = 30;
-                      start();
+                      countStream.setTime(30);
+                      countStream.start();
                     },
                     text: "30 Seg",
                   ),
@@ -58,9 +58,8 @@ class _MyAppState extends State<MyApp> {
                   child: MyButton(
                     color: Color(0xFFFF9800),
                     onPressed: () {
-                      countTime = 0;
-                      stop = 60;
-                      start();
+                      countStream.setTime(60);
+                      countStream.start();
                     },
                     text: "1 Min",
                   ),
@@ -72,9 +71,8 @@ class _MyAppState extends State<MyApp> {
                   child: MyButton(
                     color: Color(0xFFFF9800),
                     onPressed: () {
-                      countTime = 0;
-                      stop = 300;
-                      start();
+                      countStream.setTime(300);
+                      countStream.start();
                     },
                     text: "5 Min",
                   ),
@@ -82,17 +80,26 @@ class _MyAppState extends State<MyApp> {
               ],
             ),
             Expanded(
-                child: Indicator(
-              count: count,
-            )),
+                child: StreamBuilder(
+                    initialData: count,
+                    stream: countStream.stream(),
+                    builder: (_, AsyncSnapshot snapshot) {
+                      print("en el stream builder");
+                      print(snapshot);
+
+                      if (snapshot.hasData) {
+                        print(snapshot.data);
+                      }
+                      return Indicator(
+                          count: snapshot.hasData ? snapshot.data : count);
+                    })),
             Row(
               children: [
                 Expanded(
                   child: MyButton(
                     color: Color(0xFFFF5722),
-                    // ignore: unnecessary_statements
-                    onPressed: timer == null ? null : startStop,
-                    text: "Iniciar/Parar",
+                    onPressed: startStop,
+                    text: startStopLabel,
                   ),
                 ),
                 SizedBox(
@@ -101,7 +108,7 @@ class _MyAppState extends State<MyApp> {
                 Expanded(
                   child: MyButton(
                     color: Color(0xFF757575),
-                    onPressed: timer == null ? null : reset,
+                    onPressed: reset,
                     text: "Reiniciar",
                   ),
                 ),
@@ -113,39 +120,24 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  start() {
-    if (timer != null) timer.cancel();
-
-    timer = Timer.periodic(Duration(seconds: 1), (Timer timer) {
-      countTime++;
+  void startStop() {
+    if (countStream.getActive()) {
+      countStream.stop();
       setState(() {
-        count.tag = countTime.toString();
-        count.percent = countTime / stop;
+        startStopLabel = "Iniciar";
       });
-      print(countTime);
-      print(timer.isActive);
-      if (countTime >= stop) {
-        timer.cancel();
-        print("cancelando");
-        print(timer.isActive);
-      }
+    } else {
+      countStream.start();
+      setState(() {
+        startStopLabel = "Parar";
+      });
+    }
+  }
+
+  void reset() {
+    setState(() {
+      startStopLabel = "Parar";
     });
-  }
-
-  startStop() {
-    if (timer != null) {
-      if (timer.isActive) {
-        timer.cancel();
-      } else {
-        start();
-      }
-    }
-  }
-
-  reset() {
-    if (timer != null) {
-      countTime = 0;
-      start();
-    }
+    countStream.reset();
   }
 }
